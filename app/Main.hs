@@ -3,13 +3,20 @@ module Main (main) where
 import Numeric
 import Data.List (intercalate)
 import Data.Foldable
+import Data.Traversable
 import Data.Int
 import Data.Word
 import Data.ByteString as BS hiding (intercalate)
+import qualified Foreign.Storable as Foreign
+import qualified Foreign.Ptr as Foreign
+import qualified Foreign.Marshal.Alloc as Foreign
+import System.IO.Unsafe
 import qualified Data.Serialize as Cereal
 import qualified Codec.Serialise as Serialise
 import qualified Data.Binary as Binary
 import qualified Codec.Winery as Winery
+
+data Dict c = c => MkDict
 
 class (
         Show a,
@@ -19,6 +26,9 @@ class (
         Winery.Serialise a
     ) => Puttable a where
     typeName :: String
+    foreignInstance :: Maybe (Dict (Foreign.Storable a))
+    default foreignInstance :: Foreign.Storable a => Maybe (Dict (Foreign.Storable a))
+    foreignInstance = Just MkDict
 
 instance Puttable () where
     typeName = "Unit"
@@ -40,6 +50,7 @@ instance Puttable Int32 where
 
 instance Puttable Integer where
     typeName = "Integer"
+    foreignInstance = Nothing
 
 instance Puttable Float where
     typeName = "Float"
@@ -49,12 +60,13 @@ instance Puttable Double where
 
 instance Puttable a => Puttable [a] where
     typeName = "[" <> typeName @a <> "]"
+    foreignInstance = Nothing
 
 data TestItem = forall a. Puttable a => MkTestItem a
 
 data Candidate = MkCandidate {
     cName :: String,
-    cPut :: forall a. Puttable a => a -> ByteString
+    cPut :: forall a. Puttable a => Maybe (a -> ByteString)
 }
 
 showWord8 :: Word8 -> String
@@ -64,16 +76,27 @@ showBS :: ByteString -> String
 showBS bs = intercalate " " $ fmap showWord8 $ BS.unpack bs
 
 testCandidateItem :: TestItem -> Candidate -> IO ()
-testCandidateItem (MkTestItem value) candidate = let
-    bs = cPut candidate value
-    in putStrLn $ " " <> cName candidate <> ": " <> showBS bs <> " (" <> (show $ BS.length bs) <> ")"
+testCandidateItem (MkTestItem value) candidate = putStrLn $ " " <> cName candidate <> ": " <> case cPut candidate of
+    Just f -> let
+        bs = f value
+        in showBS bs <> " (" <> (show $ BS.length bs) <> ")"
+    Nothing -> "no"
+
+foreignEncode :: forall a. Puttable a => Maybe (a -> ByteString)
+foreignEncode = do
+    MkDict <- foreignInstance @a
+    return $ \value -> unsafePerformIO $ Foreign.alloca @a $ \ptr -> do
+        Foreign.poke ptr value
+        bb <- for [0 .. pred (Foreign.sizeOf value)] $ \i -> Foreign.peek $ Foreign.plusPtr ptr i
+        return $ pack bb
 
 candidates :: [Candidate]
 candidates =
-    [ MkCandidate "cereal" $ Cereal.encode
-    , MkCandidate "binary" $ BS.toStrict . Binary.encode
-    , MkCandidate "serialise" $ BS.toStrict . Serialise.serialise
-    , MkCandidate "winery" $ Winery.serialise
+    [ MkCandidate "foreign" foreignEncode
+    , MkCandidate "cereal" $ Just $ Cereal.encode
+    , MkCandidate "binary" $ Just $ BS.toStrict . Binary.encode
+    , MkCandidate "serialise" $ Just $ BS.toStrict . Serialise.serialise
+    , MkCandidate "winery" $ Just $ Winery.serialise
     ]
 
 items :: [TestItem]
