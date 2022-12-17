@@ -8,12 +8,14 @@ import Data.Int
 import Data.Word
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy as BS (toStrict)
+import Data.Text (Text)
 import qualified Data.ByteString as BS
 import qualified Foreign.Storable as Foreign
 import qualified Foreign.Ptr as Foreign
 import qualified Foreign.Marshal.Alloc as Foreign
 import System.IO.Unsafe
 import qualified Data.Serialize as Cereal
+import qualified Data.Serialize.Text as Cereal ()
 import qualified Codec.Serialise as Serialise
 import qualified Data.Binary as Binary
 import qualified Codec.Winery as Winery
@@ -64,8 +66,20 @@ instance Puttable Float where
 instance Puttable Double where
     typeName = "Double"
 
-instance Puttable a => Puttable [a] where
+instance {-# OVERLAPPABLE #-} Puttable a => Puttable [a] where
     typeName = "[" <> typeName @a <> "]"
+    foreignInstance = Nothing
+
+instance Puttable ByteString where
+    typeName = "ByteString"
+    foreignInstance = Nothing
+
+instance Puttable String where
+    typeName = "String"
+    foreignInstance = Nothing
+
+instance Puttable Text where
+    typeName = "Text"
     foreignInstance = Nothing
 
 data TestItem = forall a. Puttable a => MkTestItem a
@@ -126,6 +140,12 @@ items =
     , MkTestItem @[()] [()]
     , MkTestItem @[Word8] []
     , MkTestItem @[Word8] [0,1,255]
+    , MkTestItem @ByteString mempty
+    , MkTestItem @ByteString $ BS.pack [0,1,255]
+    , MkTestItem @String ""
+    , MkTestItem @String "hello"
+    , MkTestItem @Text ""
+    , MkTestItem @Text "hello"
     ]
 
 main :: IO ()

@@ -23,6 +23,9 @@ default-extensions:
 - ScopedTypeVariables
 - TypeApplications
 - DefaultSignatures
+- TypeSynonymInstances
+- FlexibleInstances
+- OverloadedStrings
 
 ghc-options:
 - -Wall
@@ -45,8 +48,10 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - bytestring
+    - text
     # candidates
     - cereal
+    - cereal-text
     - binary
     - serialise
     - winery
