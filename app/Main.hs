@@ -6,7 +6,9 @@ import Data.Foldable
 import Data.Traversable
 import Data.Int
 import Data.Word
-import Data.ByteString as BS hiding (intercalate)
+import Data.ByteString (ByteString)
+import Data.ByteString.Lazy as BS (toStrict)
+import qualified Data.ByteString as BS
 import qualified Foreign.Storable as Foreign
 import qualified Foreign.Ptr as Foreign
 import qualified Foreign.Marshal.Alloc as Foreign
@@ -16,6 +18,7 @@ import qualified Codec.Serialise as Serialise
 import qualified Data.Binary as Binary
 import qualified Codec.Winery as Winery
 import qualified Data.Store as Store
+import qualified Flat as Flat
 
 data Dict c = c => MkDict
 
@@ -25,7 +28,8 @@ class (
         Serialise.Serialise a,
         Binary.Binary a,
         Winery.Serialise a,
-        Store.Store a
+        Store.Store a,
+        Flat.Flat a
     ) => Puttable a where
     typeName :: String
     foreignInstance :: Maybe (Dict (Foreign.Storable a))
@@ -90,7 +94,7 @@ foreignEncode = do
     return $ \value -> unsafePerformIO $ Foreign.alloca @a $ \ptr -> do
         Foreign.poke ptr value
         bb <- for [0 .. pred (Foreign.sizeOf value)] $ \i -> Foreign.peek $ Foreign.plusPtr ptr i
-        return $ pack bb
+        return $ BS.pack bb
 
 candidates :: [Candidate]
 candidates =
@@ -100,6 +104,7 @@ candidates =
     , MkCandidate "binary" $ Just $ BS.toStrict . Binary.encode
     , MkCandidate "serialise" $ Just $ BS.toStrict . Serialise.serialise
     , MkCandidate "winery" $ Just $ Winery.serialise
+    , MkCandidate "flat" $ Just $ Flat.flat
     ]
 
 items :: [TestItem]

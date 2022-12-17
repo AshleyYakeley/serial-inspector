@@ -52,3 +52,4 @@ executables:
     - serialise
     - winery
     - store
+    - flat

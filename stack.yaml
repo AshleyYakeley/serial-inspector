@@ -1,4 +1,4 @@
-resolver: lts-20.4
+resolver: lts-19.33
 packages:
 - .
 
@@ -9,3 +9,4 @@ extra-deps:
 - winery-1.4
 - barbies-th-0.1.10
 - fast-builder-0.1.3.0
+- flat-0.4.4
