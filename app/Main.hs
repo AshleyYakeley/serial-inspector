@@ -140,6 +140,8 @@ items =
     , MkTestItem @[()] [()]
     , MkTestItem @[Word8] []
     , MkTestItem @[Word8] [0,1,255]
+    , MkTestItem @[Double] []
+    , MkTestItem @[Double] [0,1,255,-372.572348967482590]
     , MkTestItem @ByteString mempty
     , MkTestItem @ByteString $ BS.pack [0,1,255]
     , MkTestItem @String ""
