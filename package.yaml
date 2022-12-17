@@ -51,3 +51,4 @@ executables:
     #- flatbuffers: doens't build
     - serialise
     - winery
+    - store

@@ -15,6 +15,7 @@ import qualified Data.Serialize as Cereal
 import qualified Codec.Serialise as Serialise
 import qualified Data.Binary as Binary
 import qualified Codec.Winery as Winery
+import qualified Data.Store as Store
 
 data Dict c = c => MkDict
 
@@ -23,7 +24,8 @@ class (
         Cereal.Serialize a,
         Serialise.Serialise a,
         Binary.Binary a,
-        Winery.Serialise a
+        Winery.Serialise a,
+        Store.Store a
     ) => Puttable a where
     typeName :: String
     foreignInstance :: Maybe (Dict (Foreign.Storable a))
@@ -94,6 +96,7 @@ candidates :: [Candidate]
 candidates =
     [ MkCandidate "foreign" foreignEncode
     , MkCandidate "cereal" $ Just $ Cereal.encode
+    , MkCandidate "store" $ Just $ Store.encode
     , MkCandidate "binary" $ Just $ BS.toStrict . Binary.encode
     , MkCandidate "serialise" $ Just $ BS.toStrict . Serialise.serialise
     , MkCandidate "winery" $ Just $ Winery.serialise
