@@ -118,8 +118,10 @@ items =
     , MkTestItem @Integer 34
     , MkTestItem @Float 0
     , MkTestItem @Float 34
+    , MkTestItem @Float (-372.572348967482590)
     , MkTestItem @Double 0
     , MkTestItem @Double 34
+    , MkTestItem @Double (-372.572348967482590)
     , MkTestItem @[()] []
     , MkTestItem @[()] [()]
     , MkTestItem @[Word8] []
