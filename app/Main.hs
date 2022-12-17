@@ -26,11 +26,17 @@ instance Puttable () where
 instance Puttable Bool where
     typeName = "Bool"
 
-instance Puttable Int32 where
-    typeName = "Int32"
+instance Puttable Word8 where
+    typeName = "Word8"
+
+instance Puttable Int8 where
+    typeName = "Int8"
 
 instance Puttable Word32 where
     typeName = "Word32"
+
+instance Puttable Int32 where
+    typeName = "Int32"
 
 instance Puttable Integer where
     typeName = "Integer"
@@ -40,6 +46,9 @@ instance Puttable Float where
 
 instance Puttable Double where
     typeName = "Double"
+
+instance Puttable a => Puttable [a] where
+    typeName = "[" <> typeName @a <> "]"
 
 data TestItem = forall a. Puttable a => MkTestItem a
 
@@ -62,8 +71,8 @@ testCandidateItem (MkTestItem value) candidate = let
 candidates :: [Candidate]
 candidates =
     [ MkCandidate "cereal" $ Cereal.encode
-    , MkCandidate "serialise" $ BS.toStrict . Serialise.serialise
     , MkCandidate "binary" $ BS.toStrict . Binary.encode
+    , MkCandidate "serialise" $ BS.toStrict . Serialise.serialise
     , MkCandidate "winery" $ Winery.serialise
     ]
 
@@ -73,13 +82,17 @@ items =
     , MkTestItem @Bool False
     , MkTestItem @Bool True
     , MkTestItem @Int32 0
-    , MkTestItem @Integer 0
-    , MkTestItem @Float 0
-    , MkTestItem @Double 0
     , MkTestItem @Int32 34
+    , MkTestItem @Integer 0
     , MkTestItem @Integer 34
+    , MkTestItem @Float 0
     , MkTestItem @Float 34
+    , MkTestItem @Double 0
     , MkTestItem @Double 34
+    , MkTestItem @[()] []
+    , MkTestItem @[()] [()]
+    , MkTestItem @[Word8] []
+    , MkTestItem @[Word8] [0,1,255]
     ]
 
 main :: IO ()
