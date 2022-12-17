@@ -48,7 +48,6 @@ executables:
     # candidates
     - cereal
     - binary
-    #- flatbuffers: doens't build
     - serialise
     - winery
     - store
