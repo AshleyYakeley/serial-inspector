@@ -1,0 +1,11 @@
+resolver: lts-20.4
+packages:
+- .
+
+allow-newer: true
+
+extra-deps:
+- flatbuffers-0.3.0.0
+- winery-1.4
+- barbies-th-0.1.10
+- fast-builder-0.1.3.0
