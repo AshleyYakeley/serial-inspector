@@ -1,9 +1,11 @@
 module Main (main) where
 
+import Numeric
+import Data.List (intercalate)
 import Data.Foldable
 import Data.Int
 import Data.Word
-import Data.ByteString as BS
+import Data.ByteString as BS hiding (intercalate)
 import qualified Data.Serialize as Cereal
 import qualified Codec.Serialise as Serialise
 import qualified Data.Binary as Binary
@@ -46,9 +48,16 @@ data Candidate = MkCandidate {
     cPut :: forall a. Puttable a => a -> ByteString
 }
 
+showWord8 :: Word8 -> String
+showWord8 i = showHex (div i 16) "" <> showHex (mod i 16) ""
+
+showBS :: ByteString -> String
+showBS bs = intercalate " " $ fmap showWord8 $ BS.unpack bs
+
 testCandidateItem :: TestItem -> Candidate -> IO ()
-testCandidateItem (MkTestItem value) candidate = do
-    putStrLn $ " " <> cName candidate <> ": " <> (show $ BS.length $ cPut candidate value)
+testCandidateItem (MkTestItem value) candidate = let
+    bs = cPut candidate value
+    in putStrLn $ " " <> cName candidate <> ": " <> showBS bs <> " (" <> (show $ BS.length bs) <> ")"
 
 candidates :: [Candidate]
 candidates =
