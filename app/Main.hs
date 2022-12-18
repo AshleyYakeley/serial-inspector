@@ -117,7 +117,8 @@ candidates =
     , MkCandidate "store" $ Just $ Store.encode
     , MkCandidate "binary" $ Just $ BS.toStrict . Binary.encode
     , MkCandidate "serialise" $ Just $ BS.toStrict . Serialise.serialise
-    , MkCandidate "winery" $ Just $ Winery.serialise
+    , MkCandidate "winery-schema" $ Just $ Winery.serialise
+    , MkCandidate "winery-only" $ Just $ Winery.serialiseOnly
     , MkCandidate "flat" $ Just $ Flat.flat
     ]
 
