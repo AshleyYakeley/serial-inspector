@@ -66,6 +66,10 @@ instance Puttable Float where
 instance Puttable Double where
     typeName = "Double"
 
+instance Puttable Rational where
+    typeName = "Rational"
+    foreignInstance = Nothing
+
 instance {-# OVERLAPPABLE #-} Puttable a => Puttable [a] where
     typeName = "[" <> typeName @a <> "]"
     foreignInstance = Nothing
@@ -137,6 +141,8 @@ items =
     , MkTestItem @Double 0
     , MkTestItem @Double 34
     , MkTestItem @Double (-372.572348967482590)
+    , MkTestItem @Rational 34
+    , MkTestItem @Rational $ 34/27
     , MkTestItem @[()] []
     , MkTestItem @[()] [()]
     , MkTestItem @[Word8] []
