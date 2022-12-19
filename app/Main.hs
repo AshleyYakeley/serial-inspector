@@ -7,12 +7,12 @@ import Data.Traversable
 import Data.Int
 import Data.Word
 import Data.ByteString (ByteString)
-import Data.ByteString.Lazy as BS (toStrict)
+import Data.ByteString.Lazy as BS (fromStrict,toStrict)
 import Data.Text (Text)
 import qualified Data.ByteString as BS
 import qualified Foreign.Storable as Foreign
 import qualified Foreign.Ptr as Foreign
-import qualified Foreign.Marshal.Alloc as Foreign
+import qualified Foreign.Marshal as Foreign
 import System.IO.Unsafe
 import qualified Data.Serialize as Cereal
 import qualified Data.Serialize.Text as Cereal ()
@@ -25,6 +25,7 @@ import qualified Flat as Flat
 data Dict c = c => MkDict
 
 class (
+        Eq a,
         Show a,
         Cereal.Serialize a,
         Serialise.Serialise a,
@@ -96,7 +97,7 @@ data TestItem = forall a. Puttable a => MkTestItem a
 
 data Candidate = MkCandidate {
     cName :: String,
-    cPut :: forall a. Puttable a => Maybe (a -> ByteString)
+    cCodec :: forall a. Puttable a => Maybe (a -> ByteString, ByteString -> Maybe a)
 }
 
 showWord8 :: Word8 -> String
@@ -106,30 +107,53 @@ showBS :: ByteString -> String
 showBS bs = intercalate " " $ fmap showWord8 $ BS.unpack bs
 
 testCandidateItem :: TestItem -> Candidate -> IO ()
-testCandidateItem (MkTestItem value) candidate = putStrLn $ " " <> cName candidate <> ": " <> case cPut candidate of
-    Just f -> let
-        bs = f value
-        in showBS bs <> " (" <> (show $ BS.length bs) <> ")"
+testCandidateItem (MkTestItem value) candidate = putStrLn $ " " <> cName candidate <> ": " <> case cCodec candidate of
+    Just (encode,decode) -> let
+        bs = encode value
+        in case decode bs of
+            Just value' | value == value' -> showBS bs <> " (" <> (show $ BS.length bs) <> ")"
+            _ -> "FAILED"
     Nothing -> "no"
 
-foreignEncode :: forall a. Puttable a => Maybe (a -> ByteString)
-foreignEncode = do
+foreignCodec :: forall a. Puttable a => Maybe (a -> ByteString, ByteString -> Maybe a)
+foreignCodec = do
     MkDict <- foreignInstance @a
-    return $ \value -> unsafePerformIO $ Foreign.alloca @a $ \ptr -> do
-        Foreign.poke ptr value
-        bb <- for [0 .. pred (Foreign.sizeOf value)] $ \i -> Foreign.peek $ Foreign.plusPtr ptr i
-        return $ BS.pack bb
+    let
+        encode :: a -> ByteString
+        encode value = unsafePerformIO $ Foreign.with value $ \ptr -> do
+            bb <- for [0 .. pred (Foreign.sizeOf value)] $ \i -> Foreign.peek $ Foreign.plusPtr ptr i
+            return $ BS.pack bb
+        decode :: ByteString -> Maybe a
+        decode bs = do
+            let vsize = Foreign.sizeOf (undefined :: a)
+            if BS.length bs == vsize then return () else Nothing
+            return $ unsafePerformIO $ Foreign.alloca $ \ptr -> do
+                for_ [0 .. pred vsize] $ \i -> Foreign.poke (Foreign.plusPtr ptr i) $ BS.unpack bs !! i
+                Foreign.peek ptr
+    return (encode,decode)
+
+eitherToMaybe :: Either a b -> Maybe b
+eitherToMaybe (Right v) = Just v
+eitherToMaybe (Left _) = Nothing
+
+winery_deserialiseOnly :: forall a. Winery.Serialise a => ByteString -> Either Winery.WineryException a
+winery_deserialiseOnly bs = do
+    decoder <- Winery.getDecoder $ Winery.schema $ Nothing @a
+    return $ Winery.evalDecoder decoder bs
 
 candidates :: [Candidate]
 candidates =
-    [ MkCandidate "foreign" foreignEncode
-    , MkCandidate "cereal" $ Just $ Cereal.encode
-    , MkCandidate "store" $ Just $ Store.encode
-    , MkCandidate "binary" $ Just $ BS.toStrict . Binary.encode
-    , MkCandidate "serialise" $ Just $ BS.toStrict . Serialise.serialise
-    , MkCandidate "winery-schema" $ Just $ Winery.serialise
-    , MkCandidate "winery-only" $ Just $ Winery.serialiseOnly
-    , MkCandidate "flat" $ Just $ Flat.flat
+    [ MkCandidate "foreign" foreignCodec
+    , MkCandidate "cereal" $ Just (Cereal.encode, eitherToMaybe . Cereal.decode)
+    , MkCandidate "store" $ Just (Store.encode, eitherToMaybe . Store.decode)
+    , MkCandidate "binary" $ Just (BS.toStrict . Binary.encode, \bs -> do
+        (remaining,_,a) <- eitherToMaybe $ Binary.decodeOrFail $ BS.fromStrict bs
+        if remaining == mempty then return a else Nothing
+        )
+    , MkCandidate "serialise" $ Just (BS.toStrict . Serialise.serialise, eitherToMaybe . Serialise.deserialiseOrFail . BS.fromStrict)
+    , MkCandidate "winery-schemed" $ Just (Winery.serialise, eitherToMaybe . Winery.deserialise)
+    , MkCandidate "winery-only" $ Just (Winery.serialiseOnly, eitherToMaybe . winery_deserialiseOnly)
+    , MkCandidate "flat" $ Just (Flat.flat, eitherToMaybe . Flat.unflat)
     ]
 
 items :: [TestItem]
