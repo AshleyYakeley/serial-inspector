@@ -21,6 +21,7 @@ import qualified Data.Binary as Binary
 import qualified Codec.Winery as Winery
 import qualified Data.Store as Store
 import qualified Flat as Flat
+import qualified Data.Persist as Persist
 
 data Dict c = c => MkDict
 
@@ -32,7 +33,8 @@ class (
         Binary.Binary a,
         Winery.Serialise a,
         Store.Store a,
-        Flat.Flat a
+        Flat.Flat a,
+        Persist.Persist a
     ) => Puttable a where
     typeName :: String
     foreignInstance :: Maybe (Dict (Foreign.Storable a))
@@ -154,6 +156,7 @@ candidates =
     , MkCandidate "winery-schemed" $ Just (Winery.serialise, eitherToMaybe . Winery.deserialise)
     , MkCandidate "winery-only" $ Just (Winery.serialiseOnly, eitherToMaybe . winery_deserialiseOnly)
     , MkCandidate "flat" $ Just (Flat.flat, eitherToMaybe . Flat.unflat)
+    , MkCandidate "persist" $ Just (Persist.encode, eitherToMaybe . Persist.decode)
     ]
 
 items :: [TestItem]

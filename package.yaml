@@ -57,3 +57,4 @@ executables:
     - winery
     - store
     - flat
+    - persist
