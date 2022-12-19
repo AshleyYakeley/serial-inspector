@@ -50,6 +50,12 @@ instance Puttable Word8 where
 instance Puttable Int8 where
     typeName = "Int8"
 
+instance Puttable Word16 where
+    typeName = "Word16"
+
+instance Puttable Int16 where
+    typeName = "Int16"
+
 instance Puttable Word32 where
     typeName = "Word32"
 
@@ -131,10 +137,17 @@ items =
     [ MkTestItem @() ()
     , MkTestItem @Bool False
     , MkTestItem @Bool True
+    , MkTestItem @Word8 0
+    , MkTestItem @Word8 34
+    , MkTestItem @Word16 0
+    , MkTestItem @Word16 34
+    , MkTestItem @Word16 50000
     , MkTestItem @Int32 0
     , MkTestItem @Int32 34
+    , MkTestItem @Int32 (-7465726)
     , MkTestItem @Integer 0
     , MkTestItem @Integer 34
+    , MkTestItem @Integer 2354723896
     , MkTestItem @Float 0
     , MkTestItem @Float 34
     , MkTestItem @Float (-372.572348967482590)
@@ -151,6 +164,7 @@ items =
     , MkTestItem @[Double] [0,1,255,-372.572348967482590]
     , MkTestItem @ByteString mempty
     , MkTestItem @ByteString $ BS.pack [0,1,255]
+    , MkTestItem @ByteString $ BS.pack [15,17,240,12,0,11,1]
     , MkTestItem @String ""
     , MkTestItem @String "hello"
     , MkTestItem @Text ""
