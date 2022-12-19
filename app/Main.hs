@@ -4,6 +4,7 @@ import Numeric
 import Data.List (intercalate)
 import Data.Foldable
 import Data.Traversable
+import Data.Char
 import Data.Int
 import Data.Word
 import Data.ByteString (ByteString)
@@ -103,7 +104,7 @@ data Candidate = MkCandidate {
 }
 
 showWord8 :: Word8 -> String
-showWord8 i = showHex (div i 16) "" <> showHex (mod i 16) ""
+showWord8 i = fmap toUpper $ showHex (div i 16) "" <> showHex (mod i 16) ""
 
 showBS :: ByteString -> String
 showBS bs = intercalate " " $ fmap showWord8 $ BS.unpack bs
