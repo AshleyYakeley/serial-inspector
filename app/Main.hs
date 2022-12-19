@@ -48,6 +48,9 @@ instance Puttable () where
 instance Puttable Bool where
     typeName = "Bool"
 
+instance Puttable Char where
+    typeName = "Char"
+
 instance Puttable Word8 where
     typeName = "Word8"
 
@@ -193,9 +196,15 @@ items =
     , MkTestItem @ByteString mempty
     , MkTestItem @ByteString $ BS.pack [0,1,255]
     , MkTestItem @ByteString $ BS.pack [15,17,240,12,0,11,1]
+    , MkTestItem @Char 'a'
+    , MkTestItem @Char '\x2588'
     , MkTestItem @String ""
+    , MkTestItem @String "a"
+    , MkTestItem @String "\x2588"
     , MkTestItem @String "hello"
     , MkTestItem @Text ""
+    , MkTestItem @Text "a"
+    , MkTestItem @Text "\x2588"
     , MkTestItem @Text "hello"
     ]
 
