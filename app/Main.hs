@@ -15,6 +15,8 @@ import qualified Foreign.Storable as Foreign
 import qualified Foreign.Ptr as Foreign
 import qualified Foreign.Marshal as Foreign
 import System.IO.Unsafe
+
+-- Candidates
 import qualified Data.Serialize as Cereal
 import qualified Data.Serialize.Text as Cereal ()
 import qualified Codec.Serialise as Serialise
@@ -177,8 +179,15 @@ items =
     , MkTestItem @Int32 34
     , MkTestItem @Int32 (-7465726)
     , MkTestItem @Integer 0
+    , MkTestItem @Integer 1
+    , MkTestItem @Integer (-1)
     , MkTestItem @Integer 34
     , MkTestItem @Integer 2354723896
+    , MkTestItem @Integer 0xFF123456789ABCDEF0
+    , MkTestItem @Integer 0xFFFFFFFFFFFFFFFFFF
+    , MkTestItem @Integer 0x1000000000000000000
+    , MkTestItem @Integer (-0xFFFFFFFFFFFFFFFFFF)
+    , MkTestItem @Integer (-0x1000000000000000000)
     , MkTestItem @Float 0
     , MkTestItem @Float 34
     , MkTestItem @Float (-372.572348967482590)
