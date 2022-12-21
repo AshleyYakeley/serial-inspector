@@ -15,7 +15,7 @@ import qualified Foreign.Storable as Foreign
 import qualified Foreign.Ptr as Foreign
 import qualified Foreign.Marshal as Foreign
 import System.IO.Unsafe
-import Shapes
+import Shapes ()
 
 -- Candidates
 import qualified "cereal" Data.Serialize as Cereal
