@@ -25,6 +25,13 @@ packages:
       size: 986
   original:
     hackage: fast-builder-0.1.3.0
+- completed:
+    hackage: leb128-0.1.0.0@sha256:f07e491e34bcac09bd816daefe1b9cfba163249a776b5c669821ebd0f7a5118b,1854
+    pantry-tree:
+      sha256: f604a03c6366251ffca268b94026f7a1032f319327f1f1877a274c2f59ef735f
+      size: 758
+  original:
+    hackage: leb128-0.1.0.0
 snapshots:
 - completed:
     sha256: 3770dfd79f5aed67acdcc65c4e7730adddffe6dba79ea723cfb0918356fc0f94

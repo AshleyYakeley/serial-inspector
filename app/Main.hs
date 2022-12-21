@@ -15,6 +15,7 @@ import qualified Foreign.Storable as Foreign
 import qualified Foreign.Ptr as Foreign
 import qualified Foreign.Marshal as Foreign
 import System.IO.Unsafe
+import Shapes
 
 -- Candidates
 import qualified "cereal" Data.Serialize as Cereal
@@ -25,6 +26,7 @@ import qualified "winery" Codec.Winery as Winery
 import qualified "store" Data.Store as Store
 --import qualified "flat" Flat as Flat
 import qualified "persist" Data.Persist as Persist
+import qualified "shapes" Data.Serializer as Shapes
 
 data Dict c = c => MkDict
 
@@ -37,7 +39,8 @@ class (
         Winery.Serialise a,
         Store.Store a,
 --        Flat.Flat a,
-        Persist.Persist a
+        Persist.Persist a,
+        Shapes.HasSerializer a
     ) => Puttable a where
     typeName :: String
     foreignInstance :: Maybe (Dict (Foreign.Storable a))
@@ -163,6 +166,7 @@ candidates =
     , MkCandidate "winery-only" $ Just (Winery.serialiseOnly, eitherToMaybe . winery_deserialiseOnly)
 --    , MkCandidate "flat" $ Just (Flat.flat, eitherToMaybe . Flat.unflat)
     , MkCandidate "persist" $ Just (Persist.encode, eitherToMaybe . Persist.decode)
+    , MkCandidate "shapes" $ Just (Shapes.serializerStrictEncode Shapes.serializer, Shapes.serializerStrictDecode Shapes.serializer)
     ]
 
 items :: [TestItem]

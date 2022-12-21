@@ -34,7 +34,6 @@ ghc-options:
 - -Widentities
 - -Wincomplete-record-updates
 - -Wincomplete-uni-patterns
-- -Wmissing-export-lists
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
@@ -42,6 +41,8 @@ ghc-options:
 executables:
   serial-inspector-exe:
     main:                Main.hs
+    other-modules:
+    - Shapes
     source-dirs:         app
     ghc-options:
     - -threaded
@@ -50,6 +51,7 @@ executables:
     dependencies:
     - bytestring
     - text
+    - type-rig
     # candidates
     - cereal
     - cereal-text
@@ -59,3 +61,5 @@ executables:
     - store
     #- flat -- broken with GHC 9.2
     - persist
+    - primitive-serial
+    - shapes
