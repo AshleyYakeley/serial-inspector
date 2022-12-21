@@ -26,6 +26,7 @@ default-extensions:
 - TypeSynonymInstances
 - FlexibleInstances
 - OverloadedStrings
+- PackageImports
 
 ghc-options:
 - -Wall

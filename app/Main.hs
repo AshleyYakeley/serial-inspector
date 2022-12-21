@@ -17,14 +17,14 @@ import qualified Foreign.Marshal as Foreign
 import System.IO.Unsafe
 
 -- Candidates
-import qualified Data.Serialize as Cereal
-import qualified Data.Serialize.Text as Cereal ()
-import qualified Codec.Serialise as Serialise
-import qualified Data.Binary as Binary
-import qualified Codec.Winery as Winery
-import qualified Data.Store as Store
-import qualified Flat as Flat
-import qualified Data.Persist as Persist
+import qualified "cereal" Data.Serialize as Cereal
+import qualified "cereal-text" Data.Serialize.Text as Cereal ()
+import qualified "serialise" Codec.Serialise as Serialise
+import qualified "binary" Data.Binary as Binary
+import qualified "winery" Codec.Winery as Winery
+import qualified "store" Data.Store as Store
+import qualified "flat" Flat as Flat
+import qualified "persist" Data.Persist as Persist
 
 data Dict c = c => MkDict
 
