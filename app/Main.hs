@@ -23,7 +23,7 @@ import qualified "serialise" Codec.Serialise as Serialise
 import qualified "binary" Data.Binary as Binary
 import qualified "winery" Codec.Winery as Winery
 import qualified "store" Data.Store as Store
-import qualified "flat" Flat as Flat
+--import qualified "flat" Flat as Flat
 import qualified "persist" Data.Persist as Persist
 
 data Dict c = c => MkDict
@@ -36,7 +36,7 @@ class (
         Binary.Binary a,
         Winery.Serialise a,
         Store.Store a,
-        Flat.Flat a,
+--        Flat.Flat a,
         Persist.Persist a
     ) => Puttable a where
     typeName :: String
@@ -161,7 +161,7 @@ candidates =
     , MkCandidate "serialise" $ Just (BS.toStrict . Serialise.serialise, eitherToMaybe . Serialise.deserialiseOrFail . BS.fromStrict)
     , MkCandidate "winery-schemed" $ Just (Winery.serialise, eitherToMaybe . Winery.deserialise)
     , MkCandidate "winery-only" $ Just (Winery.serialiseOnly, eitherToMaybe . winery_deserialiseOnly)
-    , MkCandidate "flat" $ Just (Flat.flat, eitherToMaybe . Flat.unflat)
+--    , MkCandidate "flat" $ Just (Flat.flat, eitherToMaybe . Flat.unflat)
     , MkCandidate "persist" $ Just (Persist.encode, eitherToMaybe . Persist.decode)
     ]
 
